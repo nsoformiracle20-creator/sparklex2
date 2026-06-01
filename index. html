@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sparklex - AI for Law Students</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css">
+  <script src="https://js.paystack.co/v1/inline.js"></script>
+  <style>
+    .hero-bg { background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); }
+    .chat-bubble { max-width: 85%; }
+    .message { animation: fadeIn 0.3s; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body class="bg-gray-50 font-sans">
+
+  <!-- Navbar -->
+  <nav class="bg-white shadow-md sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
+      <div class="flex items-center space-x-3">
+        <i class="fa-solid fa-gavel text-blue-600 text-3xl"></i>
+        <h1 class="text-2xl font-bold text-blue-900">Sparklex</h1>
+      </div>
+      <div class="flex items-center gap-8">
+        <a href="#" onclick="navigateTo('home')" class="hover:text-blue-600">Home</a>
+        <a href="#" onclick="navigateTo('chat')" class="hover:text-blue-600">Chat</a>
+        <a href="#" onclick="navigateTo('pricing')" class="hover:text-blue-600">Pricing</a>
+      </div>
+      <div class="flex items-center gap-6">
+        <button onclick="toggleDarkMode()" class="text-xl">🌙</button>
+        <span id="user-info" class="hidden text-sm font-medium"></span>
+        <button onclick="logout()" id="logout-btn" class="hidden text-red-600">Logout</button>
+        <button onclick="showLoginModal()" id="login-btn" class="text-blue-600 font-medium">Log in</button>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Home -->
+  <section id="home-section" class="hero-bg text-white py-24">
+    <div class="max-w-7xl mx-auto px-6 text-center">
+      <h2 class="text-5xl font-bold mb-6">Sparklex AI for Law Students</h2>
+      <p class="text-xl mb-8">Master IRAC, cases, and exams</p>
+      <button onclick="navigateTo('chat')" class="bg-white text-blue-900 px-10 py-4 rounded-2xl text-lg font-semibold">Start Chatting</button>
+    </div>
+  </section>
+
+  <!-- Chat Section -->
+  <section id="chat-section" class="py-20 bg-gray-100 hidden">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="bg-white rounded-3xl shadow-2xl overflow-hidden">
+        <div class="bg-blue-900 text-white px-6 py-4 flex justify-between items-center">
+          <div class="flex items-center gap-3">
+            <i class="fa-solid fa-gavel"></i>
+            <div>Sparklex AI</div>
+          </div>
+          <div id="usage-info" class="text-xs bg-white/20 px-4 py-1 rounded-full"></div>
+        </div>
+        <div id="chat-window" class="h-96 p-6 overflow-y-auto bg-gray-50 space-y-4"></div>
+        <div class="p-5 border-t">
+          <input id="user-input" type="text" class="w-full border rounded-2xl px-6 py-4 mb-3" placeholder="Type your legal question here...">
+          <div class="flex gap-3">
+            <button onclick="sendMessage()" class="flex-1 bg-blue-600 text-white py-3 rounded-2xl">Send Message</button>
+            <button onclick="exportChat()" class="px-6 border rounded-2xl">Export Chat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing-section" class="py-20 bg-white hidden">
+    <div class="max-w-5xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+      <div class="border rounded-3xl p-8 text-center">
+        <h3 class="text-2xl font-bold">Free Trial</h3>
+        <p class="text-6xl font-bold my-4">₦0</p>
+        <button onclick="startFreeTrial()" class="w-full py-4 border-2 border-blue-600 text-blue-600 rounded-2xl">Start Free Trial</button>
+      </div>
+      <div class="border-2 border-blue-600 rounded-3xl p-8 text-center relative scale-105">
+        <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white px-6 py-1 rounded-full text-sm">Popular</div>
+        <h3 class="text-2xl font-bold">Basic</h3>
+        <p class="text-6xl font-bold my-4">₦5,000</p>
+        <button onclick="payWithPaystack(5000, 'Basic')" class="w-full py-4 bg-blue-600 text-white rounded-2xl">Subscribe - ₦5,000</button>
+      </div>
+      <div class="border rounded-3xl p-8 text-center">
+        <h3 class="text-2xl font-bold">Pro</h3>
+        <p class="text-6xl font-bold my-4">₦10,000</p>
+        <button onclick="payWithPaystack(10000, 'Pro')" class="w-full py-4 border-2 border-blue-600 text-blue-600 rounded-2xl">Subscribe - ₦10,000</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Login Modal -->
+  <div id="login-modal" class="hidden fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div class="bg-white rounded-3xl p-8 w-full max-w-md">
+      <h3 class="text-2xl font-bold mb-6">Log in or Sign up</h3>
+      <input id="email" type="email" placeholder="your@email.com" class="w-full px-5 py-4 border rounded-2xl mb-4">
+      <button onclick="login()" class="w-full py-4 bg-blue-600 text-white rounded-2xl">Continue</button>
+      <button onclick="hideLoginModal()" class="w-full py-4 text-gray-500">Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    let currentUser = null;
+    let messagesUsed = 0;
+    let plan = "trial";
+    let chatHistory = [];
+
+    function navigateTo(page) {
+      document.querySelectorAll('section').forEach(s => s.classList.add('hidden'));
+      document.getElementById(page + '-section').classList.remove('hidden');
+    }
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    function initUser() {
+      const saved = localStorage.getItem('sparklexUser');
+      if (saved) {
+        currentUser = JSON.parse(saved);
+        plan = currentUser.plan;
+        messagesUsed = currentUser.messagesUsed || 0;
+        chatHistory = currentUser.chatHistory || [];
+        document.getElementById('user-info').classList.remove('hidden');
+        document.getElementById('user-info').textContent = currentUser.email;
+        document.getElementById('login-btn').classList.add('hidden');
+        document.getElementById('logout-btn').classList.remove('hidden');
+      }
+    }
+
+    function login() {
+      const email = document.getElementById('email').value || "student@sparklex.com";
+      currentUser = { email: email, plan: "trial", messagesUsed: 0, chatHistory: [] };
+      localStorage.setItem('sparklexUser', JSON.stringify(currentUser));
+      hideLoginModal();
+      initUser();
+      navigateTo('chat');
+    }
+
+    function logout() {
+      localStorage.removeItem('sparklexUser');
+      location.reload();
+    }
+
+    function showLoginModal() {
+      document.getElementById('login-modal').classList.remove('hidden');
+    }
+
+    function hideLoginModal() {
+      document.getElementById('login-modal').classList.add('hidden');
+    }
+
+    function startFreeTrial() {
+      if (!currentUser) showLoginModal();
+      else alert("Free trial started! You have 50 messages.");
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('user-input');
+      if (!input.value.trim() || !currentUser) return;
+
+      const chat = document.getElementById('chat-window');
+      const userMsg = document.createElement('div');
+      userMsg.className = "chat-bubble bg-blue-600 text-white p-4 rounded-3xl ml-auto";
+      userMsg.textContent = input.value;
+      chat.appendChild(userMsg);
+
+      chatHistory.push({type: "user", text: input.value});
+      messagesUsed++;
+      saveData();
+
+      const query = input.value;
+      input.value = "";
+
+      setTimeout(() => {
+        const aiMsg = document.createElement('div');
+        aiMsg.className = "chat-bubble bg-gray-200 p-4 rounded-3xl";
+        aiMsg.innerHTML = `<strong>Issue:</strong> ${query}<br><strong>Rule:</strong> Relevant law (1999 Constitution etc.)<br><strong>Application:</strong> ...<br><strong>Conclusion:</strong> ...`;
+        chat.appendChild(aiMsg);
+        chat.scrollTop = chat.scrollHeight;
+        chatHistory.push({type: "ai", text: aiMsg.innerHTML});
+        saveData();
+      }, 1000);
+    }
+
+    function saveData() {
+      if (currentUser) {
+        currentUser.messagesUsed = messagesUsed;
+        currentUser.chatHistory = chatHistory;
+        localStorage.setItem('sparklexUser', JSON.stringify(currentUser));
+      }
+    }
+
+    function exportChat() {
+      let text = chatHistory.map(m => m.type.toUpperCase() + ": " + m.text).join("\n\n");
+      const blob = new Blob([text], {type: "text/plain"});
+      const a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = "sparklex-chat.txt";
+      a.click();
+    }
+
+    function payWithPaystack(amount, planName) {
+      if (!currentUser) {
+        alert("Please log in first");
+        showLoginModal();
+        return;
+      }
+      alert(`Payment simulation for \( {planName} plan (₦ \){amount}). In real version, Paystack will open here.`);
+      // Real Paystack code can be added after you get your key
+      plan = planName.toLowerCase();
+      currentUser.plan = plan;
+      localStorage.setItem('sparklexUser', JSON.stringify(currentUser));
+    }
+
+    window.onload = () => {
+      initUser();
+      navigateTo('home');
+    };
+  </script>
+</body>
+</html>
